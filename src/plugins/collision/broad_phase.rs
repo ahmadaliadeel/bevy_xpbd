@@ -8,6 +8,7 @@ use bevy::{
     ecs::entity::{EntityMapper, MapEntities},
     prelude::*,
 };
+use big_space::{GridCell, FloatingOriginSettings};
 
 /// Collects pairs of potentially colliding entities into [`BroadCollisionPairs`] using
 /// [AABB](ColliderAabb) intersection checks. This speeds up narrow phase collision detection,
@@ -51,17 +52,20 @@ type AABBChanged = Or<(
     Changed<LinearVelocity>,
     Changed<AngularVelocity>,
     Changed<Collider>,
+    Changed<GridCell::<i128>>
 )>;
 
 /// Updates the Axis-Aligned Bounding Boxes of all colliders. A safety margin will be added to account for sudden accelerations.
 #[allow(clippy::type_complexity)]
 fn update_aabb(
+    fos: Res<FloatingOriginSettings>,
     mut colliders: Query<
         (
             &Collider,
             &mut ColliderAabb,
             &Position,
             &Rotation,
+            &GridCell<i128>,
             Option<&ColliderParent>,
             Option<&LinearVelocity>,
             Option<&AngularVelocity>,
@@ -78,7 +82,15 @@ fn update_aabb(
     // Safety margin multiplier bigger than DELTA_TIME to account for sudden accelerations
     let safety_margin_factor = 2.0 * dt.delta_seconds_adjusted();
 
-    for (collider, mut aabb, pos, rot, collider_parent, lin_vel, ang_vel) in &mut colliders {
+    for (collider, mut aabb, pos, rot, gcell, collider_parent, lin_vel, ang_vel) in &mut colliders {
+
+        let pos_0 =  Vec3 {
+            x: gcell.x as f32 * fos.grid_edge_length() + pos.0.x,
+            y: gcell.y as f32 * fos.grid_edge_length() + pos.0.y,
+            z: gcell.z as f32 * fos.grid_edge_length() + pos.0.z,
+        };
+        let pos = Position(pos_0);
+
         let (lin_vel, ang_vel) = if let (Some(lin_vel), Some(ang_vel)) = (lin_vel, ang_vel) {
             (*lin_vel, *ang_vel)
         } else if let Some(Ok((parent_pos, Some(lin_vel), Some(ang_vel)))) =

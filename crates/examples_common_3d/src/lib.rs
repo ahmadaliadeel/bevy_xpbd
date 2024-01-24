@@ -24,7 +24,8 @@ impl Plugin for XpbdExamplePlugin {
             )
             .add_systems(Update, update_fps_text)
             .add_systems(Update, pause_button)
-            .add_systems(Update, step_button.run_if(in_state(AppState::Paused)));
+            .add_systems(Update, step_button.run_if(in_state(AppState::Paused)))
+            .insert_resource(Gravity(Vec3::NEG_Y * 20.0));
     }
 }
 

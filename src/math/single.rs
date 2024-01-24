@@ -1,6 +1,15 @@
 use super::AdjustPrecision;
 use glam::*;
 
+use big_space;
+use bevy;
+
+#[derive(Clone, Copy, bevy::prelude::Reflect)]
+pub struct BigVec3 {
+    local: Vec3,
+    cell: big_space::GridCell<i128>
+}
+
 /// The floating point number type used by Bevy XPBD.
 pub type Scalar = f32;
 /// The PI constant.

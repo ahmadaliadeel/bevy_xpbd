@@ -19,6 +19,9 @@ use crate::prelude::*;
 use bevy::prelude::*;
 use indexmap::IndexMap;
 
+use big_space;
+pub type Cell = big_space::GridCell<i128>;
+
 // Collisions are stored in an `IndexMap` that uses fxhash.
 // It should have faster iteration than a `HashMap` while mostly retaining other performance characteristics.
 //
